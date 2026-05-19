@@ -108,3 +108,16 @@ Pada broadcast chat ini, arsitektur yang dipakai adalah:
 - **Client** juga menggunakan `tokio::select!` untuk menangani dua sumber input secara konkuren: baris teks dari stdin, dan pesan dari WebSocket server.
 
 Ketika satu client mengirim pesan, server menerimanya dan mem-broadcast ke semua client yang terhubung — termasuk pengirimnya sendiri. Semua ini berjalan secara asinkron sehingga server dapat melayani banyak client sekaligus tanpa memblokir.
+
+---
+
+## Experiment 2.2: Modifying Port
+
+Port diubah dari **2000** menjadi **8080**. Ada dua file yang harus dimodifikasi karena keduanya mendefinisikan alamat koneksi secara terpisah:
+
+- **`src/bin/server.rs`** — `TcpListener::bind("127.0.0.1:8080")` → server mendengarkan di port 8080
+- **`src/bin/client.rs`** — `Uri::from_static("ws://127.0.0.1:8080")` → client terhubung ke port 8080
+
+Kedua sisi (server dan client) menggunakan protokol **WebSocket (`ws://`)**. Protokol ini didefinisikan di sisi client pada URI koneksi (`ws://127.0.0.1:8080`), sementara server menerima koneksi WebSocket melalui `ServerBuilder::new().accept(socket)` dari library `tokio-websockets` yang secara otomatis melakukan WebSocket handshake di atas koneksi TCP biasa.
+
+Port harus konsisten di kedua file — jika hanya salah satu yang diubah, client tidak akan bisa terhubung ke server.
