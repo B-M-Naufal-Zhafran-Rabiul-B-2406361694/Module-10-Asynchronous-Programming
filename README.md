@@ -199,3 +199,47 @@ Pada eksperimen ini, tampilan webclient YewChat dibuat lebih menarik dan lebih m
 Perubahan ini berfokus pada sisi frontend tanpa mengubah alur komunikasi WebSocket. Komponen `Chat` tetap menerima daftar user dan pesan dari server, lalu me-render data tersebut di browser. Bedanya, data yang sama sekarang ditampilkan dengan layout yang lebih rapi sehingga user bisa lebih mudah membedakan daftar pengguna, area percakapan, dan form untuk mengirim pesan.
 
 Webclient masih berjalan menggunakan Yew dan WebAssembly. Ketika user mengirim pesan, pesan tetap dikirim ke WebSocket server, kemudian server melakukan broadcast ke client yang terhubung. Karena hanya tampilan yang diubah, fungsi real-time chat tetap sama seperti eksperimen 3.1, tetapi pengalaman pengguna menjadi lebih nyaman dan terlihat lebih personal.
+
+---
+
+## Bonus: Rust WebSocket Server for YewChat!
+
+### Cara Menjalankan
+
+Pada bonus ini, server JavaScript dari `SimpleWebsocketServer` diganti dengan server Rust dari project `broadcast-chat`.
+
+**Terminal 1 — Rust WebSocket Server:**
+```bash
+cd broadcast-chat
+cargo run --bin server
+```
+
+**Terminal 2 — YewChat Frontend:**
+```bash
+cd YewChat
+npm start
+```
+
+Frontend tetap dibuka melalui `http://localhost:8000`, sedangkan WebSocket server Rust berjalan di `ws://127.0.0.1:8080`.
+
+### Hasil Eksekusi
+
+![Capture Rust WebSocket server for YewChat](captureBonus.png)
+
+### Perubahan yang Dilakukan
+
+Server Rust pada `broadcast-chat/src/bin/server.rs` diubah agar tidak lagi hanya mengirim teks biasa. Server sekarang memahami format JSON yang digunakan oleh YewChat, yaitu:
+
+- `messageType: "register"` untuk mendaftarkan username client.
+- `messageType: "users"` untuk mengirim daftar user yang sedang terhubung.
+- `messageType: "message"` untuk mengirim pesan chat ke semua client.
+
+Untuk mendukung format tersebut, project `broadcast-chat` juga menambahkan dependency `serde` dan `serde_json`. Server menyimpan daftar user aktif, lalu melakukan broadcast daftar user setiap kali ada user baru yang register atau koneksi user terputus.
+
+### Penjelasan
+
+Perubahan ini berhasil karena YewChat sebenarnya tetap mengirim data WebSocket sebagai teks. Perbedaannya, isi teks tersebut berupa JSON yang sudah diserialisasi. Selama server Rust bisa melakukan deserialisasi JSON dari client dan mengirim kembali JSON dengan struktur yang sama seperti server JavaScript, frontend YewChat tidak perlu diubah.
+
+Saat user melakukan register, server Rust menyimpan pasangan alamat koneksi dan username. Ketika user mengirim pesan, server mencari username berdasarkan koneksi tersebut, membungkus pesan ke format JSON `message`, lalu melakukan broadcast melalui `tokio::sync::broadcast`. Dengan cara ini, Rust server dapat menggantikan JavaScript server tanpa mengubah kontrak komunikasi di frontend.
+
+Menurut saya, versi Rust lebih saya prefer untuk bagian server karena type system dan pattern matching membantu menjaga struktur pesan lebih eksplisit. Jika format JSON berubah, perubahan tipe pada Rust lebih mudah dilacak saat compile time. Namun, versi JavaScript tetap lebih sederhana untuk prototyping cepat karena kode awalnya lebih pendek dan tidak memerlukan definisi tipe sebanyak Rust.
