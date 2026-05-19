@@ -1,2 +1,7 @@
 /hello_world/target/
 /broadcast-chat/target/
+/YewChat/node_modules/
+/YewChat/dist/
+/YewChat/pkg/
+/SimpleWebsocketServer/node_modules/
+/SimpleWebsocketServer/dist/

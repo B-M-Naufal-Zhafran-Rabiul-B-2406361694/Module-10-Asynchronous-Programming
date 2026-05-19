@@ -142,3 +142,37 @@ Port harus konsisten di kedua file — jika hanya salah satu yang diubah, client
 ### Penjelasan
 
 Perubahan ini penting agar setiap client yang menerima pesan tahu **dari mana pesan itu berasal**. Karena belum ada sistem nama pengguna, informasi IP:Port digunakan sebagai identitas pengirim. Server menyisipkan `addr` (yang sudah dimiliki dari saat `accept()` koneksi) ke dalam string pesan sebelum di-broadcast, sehingga semua client penerima bisa melihat siapa yang mengirim pesan tersebut.
+
+---
+
+## Experiment 3.1: Original Code
+
+### Cara Menjalankan
+
+**Terminal 1 — WebSocket Server:**
+```bash
+cd SimpleWebsocketServer
+npm install
+npm start
+```
+Server berjalan di port 8080.
+
+**Terminal 2 — YewChat Frontend:**
+```bash
+cd YewChat
+npm install
+npm start
+```
+Browser akan terbuka otomatis di `http://localhost:8000`. Setelah memasukkan username, user bisa mulai mengirim pesan melalui tampilan web chat.
+
+### Hasil Eksekusi
+
+![Capture YewChat original code](capture3.1.png)
+
+### Penjelasan
+
+Pada eksperimen ini, aplikasi **YewChat** dijalankan menggunakan frontend berbasis **Yew** dan backend **Node.js WebSocket server** dari `SimpleWebsocketServer`. Frontend Yew dikompilasi dari Rust menjadi WebAssembly, lalu dijalankan di browser melalui webpack development server.
+
+Ketika user login dan mengirim pesan dari browser, komponen chat di Yew mengirim data tersebut ke WebSocket server. Server kemudian menerima pesan dan melakukan broadcast ke semua client yang sedang terhubung. Dengan mekanisme ini, setiap browser yang membuka YewChat dapat melihat pesan secara real-time tanpa perlu melakukan refresh halaman.
+
+Eksperimen ini menunjukkan bahwa Rust tidak hanya bisa dipakai untuk program terminal, tetapi juga bisa digunakan untuk membangun antarmuka web interaktif melalui WebAssembly. Bagian komunikasi tetap berjalan secara asinkron menggunakan WebSocket, sehingga chat dapat menerima dan mengirim pesan secara langsung selama koneksi masih aktif.
