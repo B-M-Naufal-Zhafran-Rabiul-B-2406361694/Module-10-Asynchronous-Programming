@@ -176,3 +176,26 @@ Pada eksperimen ini, aplikasi **YewChat** dijalankan menggunakan frontend berbas
 Ketika user login dan mengirim pesan dari browser, komponen chat di Yew mengirim data tersebut ke WebSocket server. Server kemudian menerima pesan dan melakukan broadcast ke semua client yang sedang terhubung. Dengan mekanisme ini, setiap browser yang membuka YewChat dapat melihat pesan secara real-time tanpa perlu melakukan refresh halaman.
 
 Eksperimen ini menunjukkan bahwa Rust tidak hanya bisa dipakai untuk program terminal, tetapi juga bisa digunakan untuk membangun antarmuka web interaktif melalui WebAssembly. Bagian komunikasi tetap berjalan secara asinkron menggunakan WebSocket, sehingga chat dapat menerima dan mengirim pesan secara langsung selama koneksi masih aktif.
+
+---
+
+## Experiment 3.2: Be Creative!
+
+### Hasil Eksekusi
+
+![Capture YewChat creative webclient](capture3.2.png)
+
+### Perubahan yang Dilakukan
+
+Pada eksperimen ini, tampilan webclient YewChat dibuat lebih menarik dan lebih mudah dibaca. Beberapa perubahan yang ditambahkan adalah:
+
+- Sidebar dengan nama aplikasi **NaufChat**, nama room, jumlah user online, avatar user, dan status aktif.
+- Header chat room yang menampilkan identitas room dan jumlah partisipan.
+- Area pesan dengan background yang lebih bersih, avatar pengirim, nama pengirim, dan bubble pesan.
+- Input bar yang lebih modern dengan placeholder yang lebih jelas dan tombol kirim berbentuk lingkaran.
+
+### Penjelasan
+
+Perubahan ini berfokus pada sisi frontend tanpa mengubah alur komunikasi WebSocket. Komponen `Chat` tetap menerima daftar user dan pesan dari server, lalu me-render data tersebut di browser. Bedanya, data yang sama sekarang ditampilkan dengan layout yang lebih rapi sehingga user bisa lebih mudah membedakan daftar pengguna, area percakapan, dan form untuk mengirim pesan.
+
+Webclient masih berjalan menggunakan Yew dan WebAssembly. Ketika user mengirim pesan, pesan tetap dikirim ke WebSocket server, kemudian server melakukan broadcast ke client yang terhubung. Karena hanya tampilan yang diubah, fungsi real-time chat tetap sama seperti eksperimen 3.1, tetapi pengalaman pengguna menjadi lebih nyaman dan terlihat lebih personal.
