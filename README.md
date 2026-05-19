@@ -70,3 +70,41 @@ Urutan "done!" bisa tidak berurutan (done3 muncul lebih dulu) karena ketiga time
 Ketika `drop(spawner)` dihapus (di-comment), channel **tidak pernah ditutup** karena `Spawner` masih memegang satu sender yang aktif. `executor.run()` menggunakan `while let Ok(task) = self.ready_queue.recv()` — fungsi `recv()` akan **memblokir selamanya** menunggu task baru yang tidak pernah datang setelah semua task selesai. Akibatnya program **hang** dan tidak pernah terminate meskipun semua output sudah tercetak.
 
 `drop(spawner)` berfungsi sebagai sinyal kepada executor bahwa tidak akan ada task baru lagi, sehingga `recv()` mengembalikan `Err` dan loop berhenti dengan bersih.
+
+---
+
+## Experiment 2.1: Original Code, and How It Run
+
+### Cara Menjalankan
+
+Buka **dua terminal** atau lebih:
+
+**Terminal 1 — jalankan server:**
+```bash
+cd broadcast-chat
+cargo run --bin server
+```
+
+**Terminal 2, 3, 4 — jalankan masing-masing client:**
+```bash
+cd broadcast-chat
+cargo run --bin client
+```
+
+Ketik pesan di salah satu client, pesan tersebut akan diterima oleh semua client yang terhubung.
+
+### Hasil Eksekusi
+
+![Capture broadcast chat](capture2.1.png)
+
+### Penjelasan
+
+**Spawner** bertugas mengantrekan task ke channel, **Executor** menjalankan task-task tersebut, dan **drop** memberikan sinyal bahwa tidak ada task baru sehingga executor bisa berhenti.
+
+Pada broadcast chat ini, arsitektur yang dipakai adalah:
+
+- **Server** menerima koneksi WebSocket dari setiap client. Untuk setiap koneksi, server meng-spawn task async baru (`tokio::spawn`) yang menjalankan `handle_connection`.
+- **`handle_connection`** menggunakan `tokio::select!` untuk menangani dua kejadian secara konkuren: pesan masuk dari WebSocket client, dan pesan masuk dari broadcast channel. Ketika ada pesan dari client, pesan di-broadcast ke semua subscriber. Ketika ada pesan dari broadcast, pesan dikirim ke WebSocket client.
+- **Client** juga menggunakan `tokio::select!` untuk menangani dua sumber input secara konkuren: baris teks dari stdin, dan pesan dari WebSocket server.
+
+Ketika satu client mengirim pesan, server menerimanya dan mem-broadcast ke semua client yang terhubung — termasuk pengirimnya sendiri. Semua ini berjalan secara asinkron sehingga server dapat melayani banyak client sekaligus tanpa memblokir.
