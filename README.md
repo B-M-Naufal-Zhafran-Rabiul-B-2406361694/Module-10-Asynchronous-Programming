@@ -30,6 +30,8 @@ Singkatnya: **spawn hanya mengantrekan future, bukan menjalankannya.** Executor 
 
 ### Hasil Eksekusi — Multiple Spawn (dengan `drop`)
 
+![Capture multiple spawn with drop](capture1.3.png)
+
 ```
 Naufal's Komputer: hey hey!
 Naufal's Komputer: howdy!
@@ -41,6 +43,8 @@ Naufal's Komputer: done2!
 ```
 
 ### Hasil Eksekusi — Tanpa `drop(spawner)`
+
+![Capture tanpa drop spawner](capture1.3_nodrop.png)
 
 ```
 Naufal's Komputer: hey hey!
