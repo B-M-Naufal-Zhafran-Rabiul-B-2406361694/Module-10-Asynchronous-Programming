@@ -121,3 +121,24 @@ Port diubah dari **2000** menjadi **8080**. Ada dua file yang harus dimodifikasi
 Kedua sisi (server dan client) menggunakan protokol **WebSocket (`ws://`)**. Protokol ini didefinisikan di sisi client pada URI koneksi (`ws://127.0.0.1:8080`), sementara server menerima koneksi WebSocket melalui `ServerBuilder::new().accept(socket)` dari library `tokio-websockets` yang secara otomatis melakukan WebSocket handshake di atas koneksi TCP biasa.
 
 Port harus konsisten di kedua file — jika hanya salah satu yang diubah, client tidak akan bisa terhubung ke server.
+
+---
+
+## Experiment 2.3: Small Changes, Add IP and Port
+
+### Hasil Eksekusi
+
+![Capture small changes IP and Port](capture2.3.png)
+
+### Perubahan yang Dilakukan
+
+**`server.rs`:**
+- Saat client baru terhubung, server langsung mengirim pesan sambutan: `"Welcome to chat! Type a message"`
+- Pesan yang di-broadcast kini menyertakan IP dan Port pengirim: `format!("{addr}: {text}")`
+
+**`client.rs`:**
+- Setiap pesan dari server ditampilkan dengan prefix `"Naufal's Computer - From server: "` agar jelas bahwa pesan datang dari server dan siapa pengirim aslinya
+
+### Penjelasan
+
+Perubahan ini penting agar setiap client yang menerima pesan tahu **dari mana pesan itu berasal**. Karena belum ada sistem nama pengguna, informasi IP:Port digunakan sebagai identitas pengirim. Server menyisipkan `addr` (yang sudah dimiliki dari saat `accept()` koneksi) ke dalam string pesan sebelum di-broadcast, sehingga semua client penerima bisa melihat siapa yang mengirim pesan tersebut.

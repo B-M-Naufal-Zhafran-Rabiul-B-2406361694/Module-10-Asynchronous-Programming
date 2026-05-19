@@ -16,14 +16,18 @@ async fn handle_connection(
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let mut bcast_rx = bcast_tx.subscribe();
 
+    ws_stream
+        .send(Message::text("Welcome to chat! Type a message".to_string()))
+        .await?;
+
     loop {
         tokio::select! {
             incoming = ws_stream.next() => {
                 match incoming {
                     Some(Ok(msg)) => {
                         if let Some(text) = msg.as_text() {
-                            println!("From {addr:?}: {text}");
-                            bcast_tx.send(text.to_string())?;
+                            println!("From client {addr}: \"{text}\"");
+                            bcast_tx.send(format!("{addr}: {text}"))?;
                         }
                     }
                     _ => break,
